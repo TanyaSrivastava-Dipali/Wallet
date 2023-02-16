@@ -5,7 +5,7 @@ import validator from "validator";
 import bcrypt from "bcrypt";
 
 const userSchema = new mongoose.Schema({
-	fullName: {
+	name: {
 		type: String,
 		trim: true,
 		min: 6,
@@ -41,6 +41,18 @@ const userSchema = new mongoose.Schema({
 		min: 8,
 		max: 255,
 		select: false,
+	},
+	isEmailVerified: {
+		type: Boolean,
+		default: false,
+	},
+	otpDetails: {
+		otp: {
+			type: String,
+		},
+		otpExpiration: {
+			type: Number,
+		},
 	},
 	created: {
 		type: Date,

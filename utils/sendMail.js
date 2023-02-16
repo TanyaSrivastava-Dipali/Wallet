@@ -25,12 +25,27 @@ class EmailSender {
 			from: this.from,
 			to: this.to,
 			subject: "Welcome to the Wallet",
-			text: `Dear user,Congratulations! You have signed up for Wallet. As a Reward your wallet is credited with 100 USD on ${Date.now}`,
+			text: `Dear user,Congratulations! You have signed up for Wallet.`,
 			html: `
             <h2>Dear user,
             <h3>Congratulations!</h3>
-            <h4>You have signed up for Wallet. As a Reward your wallet is credited with 100 USD on ${new Date()}</h4>
-            Say bye to cash and card payment.Enjoy this wallet serveices.
+            <h4>You have signed up for Wallet and successfully verified your email. As a Reward your wallet is credited with 100 USD on ${new Date()}</h4>
+            `,
+		};
+		await this.transport.sendMail(mailOptions);
+	}
+
+	async sendEmailVerification(otp) {
+		const mailOptions = {
+			from: this.from,
+			to: this.to,
+			subject: "Email Confirmation",
+			text: `Dear user,Congratulations! You have signed up for Wallet. Kindly confirm your email to enjoy uninterrupted services`,
+			html: `
+            <h2>Dear user,
+            <h3>Congratulations!</h3>
+            <h4>You have signed up for Wallet
+			Kindly confirm your email. Verification OTP : ${otp}  to get joining reward.
             `,
 		};
 		await this.transport.sendMail(mailOptions);
