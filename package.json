@@ -1,0 +1,44 @@
+{
+	"name": "nodejs-wallet",
+	"version": "1.0.0",
+	"description": "Digital wallet based on nodejs",
+	"main": "index.js",
+	"type": "module",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"keywords": [
+		"node.js",
+		"express",
+		"jwt",
+		"login",
+		"registration",
+		"authentication",
+		"validation",
+		"mongodb",
+		"mongoose"
+	],
+	"author": "Tanya srivastava",
+	"license": "ISC",
+	"dependencies": {
+		"bcrypt": "^5.1.0",
+		"crypto": "^1.0.1",
+		"dotenv": "^16.0.3",
+		"express": "^4.18.2",
+		"jsonwebtoken": "^9.0.0",
+		"mongoose": "^6.9.1",
+		"nodemailer": "^6.9.1",
+		"nodemon": "^2.0.20",
+		"save": "^2.9.0",
+		"validator": "^13.9.0"
+	},
+	"devDependencies": {
+		"eslint": "^8.34.0",
+		"eslint-config-airbnb-base": "^15.0.0",
+		"eslint-config-prettier": "^8.6.0",
+		"eslint-plugin-import": "^2.27.5",
+		"eslint-plugin-prettier": "^4.2.1",
+		"hardhat": "^2.12.7",
+		"prettier": "^2.8.4"
+	}
+}
