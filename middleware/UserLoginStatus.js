@@ -18,12 +18,6 @@ const isUserLoggedIn = catchAsync(async (req, res, next) => {
 			});
 		}
 		req.user = user;
-		// if (currentUser.changedPasswordAfter(decoded.iat)) {
-		// 	return res.status(401).json({
-		// 		status: "Fail",
-		// 		message: "Should log in with new password",
-		// 	});
-		// }
 		return next();
 	}
 	res.status(401).json({

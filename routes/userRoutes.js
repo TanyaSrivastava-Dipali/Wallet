@@ -13,5 +13,12 @@ userRouter.route("/register").post(AuthController.register);
 userRouter.route("/login").post(verify, AuthController.login);
 userRouter.route("/verifyEmail").post(AuthController.verifyEmail);
 userRouter.route("/getOtpForEmailConfirmation").post(AuthController.getOtpForEmailConfirmation);
+userRouter.route("/logout").get(isUserLoggedIn, AuthController.logout);
+userRouter.route("/changepassword").post(isUserLoggedIn, AuthController.changePassword);
+// userRouter.route("/forgetPassword").post(AuthController.forgetPassword);
+// userRouter.route("/resetPassword").post(AuthController.resetPassword);
+userRouter
+	.route("/getResetPassOtpAndResetPassword")
+	.post(AuthController.getResetPassOtpAndResetPassword);
 userRouter.route("/getDetail").post(isUserLoggedIn, UserController.getDetail);
 export default userRouter;

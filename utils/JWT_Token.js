@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+
 const jwtToken = (user, statusCode, req, res) => {
 	// eslint-disable-next-line no-underscore-dangle
 	const token = jwt.sign({ Id: user._id, email: user.email }, process.env.JWT_SECRET_KEY, {
