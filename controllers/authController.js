@@ -6,13 +6,16 @@ import EmailSender from "../utils/sendMail.js";
 import catchAsync from "../utils/catchAsync.js";
 // eslint-disable-next-line import/extensions
 import generateOTP from "../utils/otpGenerator.js";
+// eslint-disable-next-line import/extensions
+import jwtToken from "../utils/JWT_Token.js";
 
 const register = catchAsync(async (req, res) => {
 	if (req.body.pass !== req.body.confirmPass) {
 		res.send("password not matched");
 		return;
 	}
-	const { email } = req.body.email;
+	// eslint-disable-next-line prefer-destructuring
+	const email = req.body.email;
 	const UserExist = await UserModel.findOne({ email });
 
 	if (UserExist) {
@@ -24,7 +27,7 @@ const register = catchAsync(async (req, res) => {
 
 	const user = await UserModel.create({
 		name: req.body.name,
-		email: req.body.email,
+		email: email.toLowerCase(),
 		walletAddress: req.body.walletAddress,
 		pass: req.body.pass,
 		confirmPass: req.body.confirmPass,
@@ -61,12 +64,10 @@ const login = catchAsync(async (req, res) => {
 			message: "Invalid login credentials",
 		});
 	}
-	res.status(400).json({
-		status: "Success",
-		User,
-	});
+	jwtToken(User, 200, req, res);
 });
 
+// eslint-disable-next-line consistent-return
 const verifyEmail = catchAsync(async (req, res) => {
 	// eslint-disable-next-line prefer-destructuring
 	const email = req.body.email;
@@ -82,9 +83,10 @@ const verifyEmail = catchAsync(async (req, res) => {
 			await user.save();
 			// const mail = new EmailSender(user);
 			// await mail.sendGreetingMessage();
-			res.status(201).send("Email Verified Successfully");
+			console.log("Email Verified Successfully");
+			jwtToken(user, 200, req, res);
 		} else {
-			res.send("Something went wrong");
+			return res.send("Something went wrong");
 		}
 	} else {
 		res.send("Email already verified");
@@ -96,7 +98,7 @@ const getOtpForEmailConfirmation = catchAsync(async (req, res) => {
 	const email = req.body.email;
 	const user = await UserModel.findOne({ email });
 	if (!user.isEmailVerified) {
-		const [verificationOtp, expTime] = generateOTP;
+		const [verificationOtp, expTime] = generateOTP();
 		user.otpDetails.otp = verificationOtp;
 		user.otpDetails.otpExpiration = expTime;
 		await user.save();

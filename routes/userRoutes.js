@@ -5,11 +5,13 @@ import * as UserController from "../controllers/userController.js";
 import * as AuthController from "../controllers/authController.js";
 // eslint-disable-next-line import/extensions
 import verify from "../middleware/verify.js";
+// eslint-disable-next-line import/extensions
+import isUserLoggedIn from "../middleware/UserLoginStatus.js";
 
 const userRouter = express.Router();
 userRouter.route("/register").post(AuthController.register);
 userRouter.route("/login").post(verify, AuthController.login);
 userRouter.route("/verifyEmail").post(AuthController.verifyEmail);
 userRouter.route("/getOtpForEmailConfirmation").post(AuthController.getOtpForEmailConfirmation);
-userRouter.route("/getDetail").post(UserController.getDetail);
+userRouter.route("/getDetail").post(isUserLoggedIn, UserController.getDetail);
 export default userRouter;
