@@ -14,7 +14,13 @@ const verify = catchAsync(async (req, res, next) => {
 			message: "User not registered",
 		});
 	}
-	req.user = user.isEmailVerified;
+	if (!user.isEmailVerified) {
+		return res.status(401).json({
+			status: "Login Failed",
+			message: "First verify your email",
+		});
+	}
+	req.user = user;
 	next();
 });
 
