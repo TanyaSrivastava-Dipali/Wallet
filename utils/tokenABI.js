@@ -1,4 +1,3 @@
-const ContractAddress = "";
 const ABI = [
 	{
 		inputs: [
@@ -375,4 +374,4 @@ const ABI = [
 		type: "function",
 	},
 ];
-export { ContractAddress, ABI };
+export default ABI;

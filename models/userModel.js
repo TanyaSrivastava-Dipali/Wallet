@@ -9,14 +9,18 @@ const userSchema = new mongoose.Schema({
 	name: {
 		type: String,
 		trim: true,
-		min: 6,
-		max: 255,
+		min: [6, "Must be at least 6, got {VALUE}"],
+		max: [255, "Must be at max 255, got {VALUE}"],
 		required: [true, "name can not be null"],
 	},
 	walletAddress: {
 		type: String,
 		required: [true, "wallet address can not ne null"],
 		validate: [validator.isEthereumAddress, "Not an Ethereum-compatible wallet address"],
+	},
+	encryptedPrivateKey: {
+		type: String,
+		required: [true, "private key can not ne null"],
 	},
 	email: {
 		type: String,
@@ -28,20 +32,22 @@ const userSchema = new mongoose.Schema({
 	},
 	role: {
 		type: String,
-		enum: ["admin", "user"],
-		default: "user",
+		enum: {
+			values: ["admin", "user"],
+			message: "{VALUE} is not supported",
+		},
 	},
 	pass: {
 		type: String,
 		required: [true, "Password can not be null"],
-		min: 8,
-		max: 255,
+		min: [8, "Must be at least 6, got {VALUE}"],
+		max: [255, "Must be at max 255, got {VALUE}"],
 		select: false,
 	},
 	confirmPass: {
 		type: String,
-		min: 8,
-		max: 255,
+		min: [8, "Must be at least 6, got {VALUE}"],
+		max: [255, "Must be at max 255, got {VALUE}"],
 		select: false,
 	},
 	isEmailVerified: {
