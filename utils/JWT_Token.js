@@ -12,13 +12,6 @@ const jwtToken = (user, statusCode, req, res) => {
 	});
 	// eslint-disable-next-line no-param-reassign
 	user.password = undefined;
-	res.status(statusCode).json({
-		status: "Success",
-		token,
-		data: {
-			user,
-		},
-	});
 };
 
 export default jwtToken;

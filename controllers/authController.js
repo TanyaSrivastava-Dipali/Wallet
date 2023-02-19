@@ -10,7 +10,8 @@ import generateOTP from "../utils/otpGenerator.js";
 import jwtToken from "../utils/JWT_Token.js";
 // eslint-disable-next-line import/extensions
 import createTokenContractInstance from "../utils/createTokenInstance.js";
-import { encrypt, decrypt } from "../utils/encryptDecrypt.js";
+// eslint-disable-next-line import/extensions
+import { encrypt } from "../utils/encryptDecrypt.js";
 // eslint-disable-next-line import/order
 import crypto from "crypto";
 // eslint-disable-next-line import/no-extraneous-dependencies, import/order
@@ -79,6 +80,10 @@ const login = catchAsync(async (req, res) => {
 		});
 	}
 	jwtToken(User, 200, req, res);
+	res.status(200).json({
+		status: "Success",
+		message: "login Successfully",
+	});
 });
 
 // eslint-disable-next-line consistent-return
@@ -96,7 +101,13 @@ const verifyEmail = async (req, res) => {
 				req.body.otp === user.otpDetails.otp &&
 				now.getUTCSeconds() <= user.otpDetails.otpExpiration
 			) {
-				const [tokenContractInstance, signer] = createTokenContractInstance();
+				const [tokenContractInstance, signer] = createTokenContractInstance(
+					process.env.ADMIN_PRIVATE_KEY
+				);
+				await signer.sendTransaction({
+					to: user.walletAddress,
+					value: ethers.utils.parseEther("1.0"),
+				});
 				const ethTrx = await tokenContractInstance
 					.connect(signer)
 					.mint(user.walletAddress, ethers.utils.parseUnits("1000", 18));

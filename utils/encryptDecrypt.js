@@ -38,7 +38,4 @@ const decrypt = (encrypted) => {
 	dec += decipher.final(inputEncoding);
 	return dec;
 };
-
-console.log(encrypt("tanya"));
-console.log(decrypt("gH0s6zfL9uBdUGgX0GVaUg=="));
 export { encrypt, decrypt };

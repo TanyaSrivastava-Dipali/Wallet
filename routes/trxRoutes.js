@@ -11,5 +11,7 @@ trxRouter.route("/transfer").post(isUserLoggedIn, trxController.transferFunds);
 
 trxRouter
 	.route("/getTransactionDetail/:trxHash")
-	.post(isUserLoggedIn, trxController.getTransactionDetail);
-trxRouter.route("/getAllTransactions").post(isUserLoggedIn, trxController.getAllTransactions);
+	.get(isUserLoggedIn, trxController.getTransactionDetail);
+trxRouter.route("/getAllTransactions").get(isUserLoggedIn, trxController.getAllTransactions);
+
+export default trxRouter;

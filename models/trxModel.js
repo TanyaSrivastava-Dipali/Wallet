@@ -5,7 +5,6 @@ const transactionSchema = new mongoose.Schema({
 	sender: {
 		type: String,
 		trim: true,
-		unique: true,
 		lowercase: true,
 		required: [true, "email can not be null"],
 		validate: [validator.isEmail, "Please provide a valid email"],
@@ -13,7 +12,6 @@ const transactionSchema = new mongoose.Schema({
 	receiver: {
 		type: String,
 		trim: true,
-		unique: true,
 		lowercase: true,
 		required: [true, "email can not be null"],
 		validate: [validator.isEmail, "Please provide a valid email"],

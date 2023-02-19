@@ -5,10 +5,6 @@ import UserModel from "../models/userModel.js";
 // eslint-disable-next-line import/extensions
 import createTokenContractInstance from "../utils/createTokenInstance.js";
 
-const getDetail = async (req, res) => {
-	console.log("signup");
-	res.send("signup");
-};
 // eslint-disable-next-line consistent-return
 const getUser = async (req, res) => {
 	try {
@@ -33,7 +29,7 @@ const getUser = async (req, res) => {
 };
 const getBalance = async (req, res) => {
 	try {
-		const [tokenContractInstance] = createTokenContractInstance();
+		const [tokenContractInstance] = createTokenContractInstance(process.env.ADMIN_PRIVATE_KEY);
 		const { email } = req.body;
 		const user = await UserModel.findOne({ email });
 		let balance = await tokenContractInstance.balanceOf(user.walletAddress);
@@ -50,4 +46,4 @@ const getBalance = async (req, res) => {
 		});
 	}
 };
-export { getDetail, getUser, getBalance };
+export { getUser, getBalance };

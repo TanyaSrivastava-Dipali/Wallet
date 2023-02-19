@@ -18,7 +18,6 @@ userRouter.route("/changepassword").post(isUserLoggedIn, AuthController.changePa
 userRouter
 	.route("/getResetPassOtpAndResetPassword")
 	.post(AuthController.getResetPassOtpAndResetPassword);
-userRouter.route("/getDetail").post(isUserLoggedIn, UserController.getDetail);
 userRouter.route("/getBalance").get(isUserLoggedIn, UserController.getBalance);
 userRouter.route("/getUser").get(isUserLoggedIn, UserController.getUser);
 export default userRouter;

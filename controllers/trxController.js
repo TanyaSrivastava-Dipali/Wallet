@@ -3,28 +3,76 @@
 import UserModel from "../models/userModel.js";
 import trxModel from "../models/trxModel.js";
 import catchAsync from "../utils/catchAsync.js";
+import { decrypt } from "../utils/encryptDecrypt.js";
+import EmailSender from "../utils/sendMail.js";
+import createTokenContractInstance from "../utils/createTokenInstance.js";
+// eslint-disable-next-line import/order
+import ethers from "ethers";
 
 // eslint-disable-next-line consistent-return
-const getTransactionDetail = catchAsync(async (req, res) => {
-	const ethTRXHash = req.params.trxHash;
-	const trx = await trxModel.findOne({ ethTRXHash });
-	if (!trx) {
-		return res.status(404).json({
+const transferFunds = async (req, res) => {
+	try {
+		const senderUser = await UserModel.findOne({ email: req.user.email });
+		const [tokenContractInstance, signer] = createTokenContractInstance(
+			decrypt(senderUser.encryptedPrivateKey)
+		);
+		const { recepientEmail, amountToTransfer } = req.body;
+		const transaferAmount = ethers.utils.parseUnits(amountToTransfer, 18);
+		const recepientUser = await UserModel.findOne({ email: recepientEmail });
+		if (!recepientUser) {
+			return res.status(404).json({
+				status: "Fail",
+				message: "Recepient address doesn't exist",
+			});
+		}
+
+		if (transaferAmount.gt(await tokenContractInstance.balanceOf(signer.address))) {
+			return res.status(401).json({
+				status: "Fail",
+				message: "Sender doesn't have sufficient balance to transfer",
+			});
+		}
+		const ethTrx = await tokenContractInstance
+			.connect(signer)
+			.transfer(recepientUser.walletAddress, transaferAmount);
+		if (!ethTrx) {
+			throw new Error("Transaction Failed");
+		}
+		const trx = await trxModel.create({
+			sender: senderUser.email,
+			receiver: recepientUser.email,
+			SenderWalletAddress: senderUser.walletAddress,
+			ReceiverWalletAddress: recepientUser.walletAddress,
+			amount: amountToTransfer,
+			ethTRXHash: ethTrx.hash,
+		});
+		await trx.save();
+		// const mailToSender = new EmailSender(senderUser);
+		// await mailToSender.sendTransactionConfirmation(
+		// 	trx[0],
+		// 	signer.address,
+		// 	recepientUser.walletAddress
+		// );
+		// const mailToReceiver = new EmailSender(recepientUser);
+		// await mailToReceiver.sendTransactionConfirmation(
+		// 	trx[0],
+		// 	signer.address,
+		// 	recepientUser.walletAddress
+		// );
+		res.status(200).json({
+			status: "Success",
+			message: "Transfer was successful",
+			// transactionId: trx[0].id,
+			ethTransactionHash: ethTrx.hash,
+		});
+	} catch (err) {
+		res.status(400).json({
 			status: "Fail",
-			message: "Transaction not found",
+			message: "Transaction failed",
+			err,
 		});
 	}
-	if (!trx.sender === req.user.email && !trx.receiver === req.user.email) {
-		return res.status(404).json({
-			status: "Fail",
-			message: "Access Denied.. You cannot access someone else's transaction details",
-		});
-	}
-	res.status(200).json({
-		status: "Success",
-		transaction: trx,
-	});
-});
+};
 
 const getAllTransactions = catchAsync(async (req, res) => {
 	if (req.user.role === "admin") {
@@ -53,4 +101,26 @@ const getAllTransactions = catchAsync(async (req, res) => {
 	});
 });
 
-export { getTransactionDetail, getAllTransactions };
+// eslint-disable-next-line consistent-return
+const getTransactionDetail = catchAsync(async (req, res) => {
+	const ethTRXHash = req.params.trxHash;
+	const trx = await trxModel.findOne({ ethTRXHash });
+	if (!trx) {
+		return res.status(404).json({
+			status: "Fail",
+			message: "Transaction not found",
+		});
+	}
+	if (!trx.sender === req.user.email && !trx.receiver === req.user.email) {
+		return res.status(404).json({
+			status: "Fail",
+			message: "Access Denied.. You cannot access someone else's transaction details",
+		});
+	}
+	res.status(200).json({
+		status: "Success",
+		transaction: trx,
+	});
+});
+
+export { getTransactionDetail, getAllTransactions, transferFunds };
