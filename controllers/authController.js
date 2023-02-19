@@ -10,6 +10,7 @@ import generateOTP from "../utils/otpGenerator.js";
 import jwtToken from "../utils/JWT_Token.js";
 // eslint-disable-next-line import/extensions
 import createTokenContractInstance from "../utils/createTokenInstance.js";
+import { encrypt, decrypt } from "../utils/encryptDecrypt.js";
 // eslint-disable-next-line import/order
 import crypto from "crypto";
 // eslint-disable-next-line import/no-extraneous-dependencies, import/order
@@ -34,12 +35,13 @@ const register = catchAsync(async (req, res) => {
 	const [verificationOtp, expTime] = generateOTP();
 	const mnemonic = bip39.generateMnemonic();
 	const wallet = ethers.Wallet.fromMnemonic(mnemonic);
+	const encryptedPrivateKey = encrypt(wallet.privateKey);
 
 	const user = await UserModel.create({
 		name: req.body.name,
 		email: email.toLowerCase(),
 		walletAddress: wallet.address,
-		encryptedPrivateKey: wallet.privateKey,
+		encryptedPrivateKey,
 		pass: req.body.pass,
 		confirmPass: req.body.confirmPass,
 		otpDetails: {

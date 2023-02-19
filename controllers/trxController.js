@@ -11,7 +11,13 @@ const getTransactionDetail = catchAsync(async (req, res) => {
 	if (!trx) {
 		return res.status(404).json({
 			status: "Fail",
-			message: "Transaction is not found",
+			message: "Transaction not found",
+		});
+	}
+	if (!trx.sender === req.user.email && !trx.receiver === req.user.email) {
+		return res.status(404).json({
+			status: "Fail",
+			message: "Access Denied.. You cannot access someone else's transaction details",
 		});
 	}
 	res.status(200).json({
@@ -36,7 +42,7 @@ const getAllTransactions = catchAsync(async (req, res) => {
 		});
 		return res.status(200).json({
 			status: "Success",
-			message: "List of all the transactions pertaining to user",
+			message: "List of all the transactions associated with user email",
 			transactionCount: allTrx.length,
 			allTrx,
 		});
