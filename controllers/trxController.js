@@ -13,11 +13,14 @@ import ethers from "ethers";
 const transferFunds = async (req, res) => {
 	try {
 		const senderUser = await UserModel.findOne({ email: req.user.email });
+		// create token contract instance and retrieve signer by decrypting serder encrypted private key
 		const [tokenContractInstance, signer] = createTokenContractInstance(
 			decrypt(senderUser.encryptedPrivateKey)
 		);
 		const { recepientEmail, amountToTransfer } = req.body;
+		// format amount
 		const transaferAmount = ethers.utils.parseUnits(amountToTransfer, 18);
+		// chech whether Recepient user  exist or not
 		const recepientUser = await UserModel.findOne({ email: recepientEmail });
 		if (!recepientUser) {
 			return res.status(404).json({
@@ -25,19 +28,21 @@ const transferFunds = async (req, res) => {
 				message: "Recepient address doesn't exist",
 			});
 		}
-
+		// check whether user has sufficient balance to transfer or not
 		if (transaferAmount.gt(await tokenContractInstance.balanceOf(signer.address))) {
 			return res.status(401).json({
 				status: "Fail",
 				message: "Sender doesn't have sufficient balance to transfer",
 			});
 		}
+		// transfer funds
 		const ethTrx = await tokenContractInstance
 			.connect(signer)
 			.transfer(recepientUser.walletAddress, transaferAmount);
 		if (!ethTrx) {
 			throw new Error("Transaction Failed");
 		}
+		// create new transaction
 		const trx = await trxModel.create({
 			sender: senderUser.email,
 			receiver: recepientUser.email,
@@ -75,6 +80,7 @@ const transferFunds = async (req, res) => {
 };
 
 const getAllTransactions = catchAsync(async (req, res) => {
+	// if requested user role is admin then send all transactions
 	if (req.user.role === "admin") {
 		const allTrx = await trxModel.find({});
 		return res.status(200).json({
@@ -84,6 +90,7 @@ const getAllTransactions = catchAsync(async (req, res) => {
 			allTrx,
 		});
 	}
+	// if requested user role is  user then send only those transactions that's associated with requester user email
 	if (req.user.role === "user") {
 		const allTrx = await trxModel.find({
 			$or: [{ sender: req.user.email }, { receiver: req.user.email }],
@@ -105,12 +112,14 @@ const getAllTransactions = catchAsync(async (req, res) => {
 const getTransactionDetail = catchAsync(async (req, res) => {
 	const ethTRXHash = req.params.trxHash;
 	const trx = await trxModel.findOne({ ethTRXHash });
+	// chech whether transaction for given transaction hash  exist or not
 	if (!trx) {
 		return res.status(404).json({
 			status: "Fail",
 			message: "Transaction not found",
 		});
 	}
+	// chech whether transaction for given transaction hash  associated to requested user  or not
 	if (!trx.sender === req.user.email && !trx.receiver === req.user.email) {
 		return res.status(404).json({
 			status: "Fail",

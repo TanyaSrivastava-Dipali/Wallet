@@ -51,7 +51,7 @@ This API is not ready for the use in production.
     parameters:  email
 #### - (POST) --- api/user/login
     parameters:  email, pass
-#### - (POST) --- api/user/logout
+#### - (GET) --- api/user/logout
 #### - (POST) --- api/user/changepassword
     parameters:  email, currentPass, newPass ,confirmNewPass
 #### - (POST) --- api/user/getResetPassOtpAndResetPassword

@@ -12,6 +12,7 @@ import createTokenContractInstance from "../utils/createTokenInstance.js";
 const getUser = async (req, res) => {
 	try {
 		const user = await UserModel.findOne({ email: req.body.email });
+		// check whether user with given email exist or not
 		if (!user) {
 			return res.status(404).json({
 				status: "Fail",
@@ -32,6 +33,7 @@ const getUser = async (req, res) => {
 };
 const getBalance = async (req, res) => {
 	try {
+		// create token contract instance
 		const [tokenContractInstance] = createTokenContractInstance(process.env.ADMIN_PRIVATE_KEY);
 		const { email } = req.body;
 		const user = await UserModel.findOne({ email });
@@ -41,6 +43,7 @@ const getBalance = async (req, res) => {
 				message: "User does not exist",
 			});
 		}
+		// check balance
 		let balance = await tokenContractInstance.balanceOf(user.walletAddress);
 		balance = ethers.utils.formatUnits(balance, 18);
 		res.status(200).json({
@@ -60,27 +63,33 @@ const getBalance = async (req, res) => {
 const deposit = async (req, res) => {
 	try {
 		const User = await UserModel.findOne({ email: req.user.email });
+		// check whether user with given email exist or not
 		if (!User) {
 			return res.status(404).json({
 				status: "Fail",
 				message: " user doesn't exist",
 			});
 		}
+
+		// create token contract instance
 		const [tokenContractInstance, signer] = createTokenContractInstance(
 			process.env.ADMIN_PRIVATE_KEY
 		);
 		const { amount } = req.body;
 		const Amt = ethers.utils.parseUnits(amount, 18);
+		// check whether amount is grater than 0 or not
 		if (Amt.lt(0)) {
 			return res.status(401).json({
 				status: "Fail",
 				message: "amount should be grater than 0",
 			});
 		}
+		// mint
 		const ethTrx = await tokenContractInstance.connect(signer).mint(User.walletAddress, Amt);
 		if (!ethTrx) {
 			throw new Error("Transaction Failed");
 		}
+		// create new transaction
 		const trx = await depositWithdrawModel.create({
 			AddressTo: User.email,
 			userWalletAddress: User.walletAddress,
@@ -113,28 +122,33 @@ const deposit = async (req, res) => {
 const withdraw = async (req, res) => {
 	try {
 		const User = await UserModel.findOne({ email: req.user.email });
+		// check whether user with given email exist or not
 		if (!User) {
 			return res.status(404).json({
 				status: "Fail",
 				message: " user doesn't exist",
 			});
 		}
+		// create token contract instance
 		const [tokenContractInstance, signer] = createTokenContractInstance(
 			process.env.ADMIN_PRIVATE_KEY
 		);
 		const { amount } = req.body;
 		const Amt = ethers.utils.parseUnits(amount, 18);
 
+		// check whether amount is grater than 0 and less than his balance or not
 		if (Amt.lt(0) && Amt.gt(await tokenContractInstance.balanceOf(User.walletAddress))) {
 			return res.status(401).json({
 				status: "Fail",
 				message: "amount should be grater than 0 and less than user balance",
 			});
 		}
+		// burn
 		const ethTrx = await tokenContractInstance.connect(signer).burn(User.walletAddress, Amt);
 		if (!ethTrx) {
 			throw new Error("Transaction Failed");
 		}
+		// create new transaction
 		const trx = await depositWithdrawModel.create({
 			AddressFrom: User.email,
 			userWalletAddress: User.walletAddress,
