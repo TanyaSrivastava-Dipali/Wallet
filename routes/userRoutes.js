@@ -6,7 +6,7 @@ import * as AuthController from "../controllers/authController.js";
 // eslint-disable-next-line import/extensions
 import verify from "../middleware/verify.js";
 // eslint-disable-next-line import/extensions
-import isUserLoggedIn from "../middleware/UserLoginStatus.js";
+import isUserLoggedIn from "../middleware/userLoginStatus.js";
 
 const userRouter = express.Router();
 userRouter.route("/register").post(AuthController.register);

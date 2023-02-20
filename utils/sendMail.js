@@ -92,7 +92,7 @@ class EmailSender {
 			text: `Transaction was successful, Deposit To: ${trx.AddressTo}(${userAddress}), of Amount: ${trx.amount}, with transaction id of ${trx.id}`,
 			html: `
             <h2>Dear user
-            <h4>Transaction was successful,  Deposit To: ${trx.AddressTo}(${userAddress}), of Amount: ${trx.amount}, with transaction id of ${trx.id}</h4>
+            <h4>Transaction was successfull,  Deposit To: ${trx.AddressTo}(${userAddress}), of Amount: ${trx.amount}, with transaction id of ${trx.id}</h4>
            <br/>
            <h4>Use Polygonscan to expore details of transaction</h4>`,
 		};

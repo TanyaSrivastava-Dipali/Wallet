@@ -7,7 +7,7 @@ import catchAsync from "../utils/catchAsync.js";
 // eslint-disable-next-line import/extensions
 import generateOTP from "../utils/otpGenerator.js";
 // eslint-disable-next-line import/extensions
-import jwtToken from "../utils/JWT_Token.js";
+import jwtToken from "../utils/jwtToken.js";
 // eslint-disable-next-line import/extensions
 import createTokenContractInstance from "../utils/createTokenInstance.js";
 // eslint-disable-next-line import/extensions
