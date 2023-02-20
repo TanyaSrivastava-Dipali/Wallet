@@ -83,6 +83,38 @@ class EmailSender {
 
 		await this.transport.sendMail(mailOptions);
 	}
+
+	async sendDepositConfirmation(trx, userAddress) {
+		const mailOptions = {
+			from: this.from,
+			to: this.to,
+			subject: "Transaction Confirmation Receipt",
+			text: `Transaction was successful, Deposit To: ${trx.AddressTo}(${userAddress}), of Amount: ${trx.amount}, with transaction id of ${trx.id}`,
+			html: `
+            <h2>Dear user
+            <h4>Transaction was successful,  Deposit To: ${trx.AddressTo}(${userAddress}), of Amount: ${trx.amount}, with transaction id of ${trx.id}</h4>
+           <br/>
+           <h4>Use Polygonscan to expore details of transaction</h4>`,
+		};
+
+		await this.transport.sendMail(mailOptions);
+	}
+
+	async sendWithdrawConfirmation(trx, userAddress) {
+		const mailOptions = {
+			from: this.from,
+			to: this.to,
+			subject: "Transaction Confirmation Receipt",
+			text: `Transaction was successful, Withdraw from: ${trx.AddressFrom}(${userAddress}), of Amount: ${trx.amount}, with transaction id of ${trx.id}`,
+			html: `
+			<h2>Dear user
+			<h4>Transaction was successful,  Withdraw From: ${trx.AddressFrom}(${userAddress}), of Amount: ${trx.amount}, with transaction id of ${trx.id}</h4>
+		   <br/>
+		   <h4>Use Polygonscan to expore details of transaction</h4>`,
+		};
+
+		await this.transport.sendMail(mailOptions);
+	}
 }
 
 export default EmailSender;

@@ -35,6 +35,12 @@ const getBalance = async (req, res) => {
 		const [tokenContractInstance] = createTokenContractInstance(process.env.ADMIN_PRIVATE_KEY);
 		const { email } = req.body;
 		const user = await UserModel.findOne({ email });
+		if (!user) {
+			return res.status(404).json({
+				status: "Fail",
+				message: "User does not exist",
+			});
+		}
 		let balance = await tokenContractInstance.balanceOf(user.walletAddress);
 		balance = ethers.utils.formatUnits(balance, 18);
 		res.status(200).json({
@@ -79,21 +85,14 @@ const deposit = async (req, res) => {
 			AddressTo: User.email,
 			userWalletAddress: User.walletAddress,
 			amount: Amt,
-			role: "deposit",
+			action: "deposit",
 			ethTRXHash: ethTrx.hash,
 		});
 		await trx.save();
-		// const mailToSender = new EmailSender(senderUser);
-		// await mailToSender.sendTransactionConfirmation(
+		// const mail = new EmailSender(User);
+		// await mail.sendDepositConfirmation(
 		// 	trx[0],
-		// 	signer.address,
-		// 	recepientUser.walletAddress
-		// );
-		// const mailToReceiver = new EmailSender(recepientUser);
-		// await mailToReceiver.sendTransactionConfirmation(
-		// 	trx[0],
-		// 	signer.address,
-		// 	recepientUser.walletAddress
+		// 	User.walletAddress
 		// );
 		res.status(200).json({
 			status: "Success",
@@ -140,21 +139,14 @@ const withdraw = async (req, res) => {
 			AddressFrom: User.email,
 			userWalletAddress: User.walletAddress,
 			amount: Amt,
-			role: "withdraw",
+			action: "withdraw",
 			ethTRXHash: ethTrx.hash,
 		});
 		await trx.save();
-		// const mailToSender = new EmailSender(senderUser);
-		// await mailToSender.sendTransactionConfirmation(
+		// const mail = new EmailSender(User);
+		// await mail.sendWithdrawConfirmation(
 		// 	trx[0],
-		// 	signer.address,
-		// 	recepientUser.walletAddress
-		// );
-		// const mailToReceiver = new EmailSender(recepientUser);
-		// await mailToReceiver.sendTransactionConfirmation(
-		// 	trx[0],
-		// 	signer.address,
-		// 	recepientUser.walletAddress
+		// 	User.walletAddress
 		// );
 		res.status(200).json({
 			status: "Success",

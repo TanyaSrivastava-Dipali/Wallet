@@ -21,7 +21,7 @@ const depositWithdrawSchema = new mongoose.Schema({
 		type: Number,
 		require: [true, "Amount must be specified"],
 	},
-	role: {
+	action: {
 		type: String,
 		enum: {
 			values: ["deposit", "withdraw"],
