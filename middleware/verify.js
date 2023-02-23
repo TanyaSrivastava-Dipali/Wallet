@@ -5,7 +5,7 @@ const verify = catchAsync(async (req, res, next) => {
 	const email = req.body.email;
 	const user = await UserModel.findOne({ email });
 	if (!user) {
-		return res.status(401).json({
+		return res.status(404).json({
 			status: "Fail",
 			message: "User not registered",
 		});

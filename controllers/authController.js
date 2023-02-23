@@ -46,8 +46,8 @@ const register = catchAsync(async (req, res) => {
 	});
 
 	const savedUser = await user.save();
-	const mail = new EmailSender(savedUser);
-	await mail.sendEmailVerification(verificationOtp);
+	// const mail = new EmailSender(savedUser);
+	// await mail.sendEmailVerification(verificationOtp);
 	res.status(201).json({
 		status: "success",
 		savedUser,
@@ -64,6 +64,10 @@ const login = catchAsync(async (req, res) => {
 	}
 	// const User = await UserModel.findOne({ email });
 	const User = await UserModel.findOne({ email }).select("+pass");
+	// checking whether user exist or not
+	if (!User) {
+		return res.status(400).send("User does not Exist. Please register");
+	}
 	// check whether entered password matches with stored password or not
 	const isMatched = await User.validatePassword(pass, User.pass);
 	if (!User || !isMatched) {
@@ -87,6 +91,10 @@ const verifyEmail = async (req, res) => {
 	const email = req.body.email;
 	// const user = await UserModel.findOne({ email }, { session });
 	const user = await UserModel.findOne({ email });
+	// checking whether user exist or not
+	if (!user) {
+		return res.status(400).send("User does not Exist. Please register");
+	}
 	// check whether user email is already verified or not
 	if (!user.isEmailVerified) {
 		try {
@@ -117,8 +125,8 @@ const verifyEmail = async (req, res) => {
 				// await session.commitTransaction();
 
 				// send mail to user with defined transport object
-				const mail = new EmailSender(user);
-				await mail.sendGreetingMessage();
+				// const mail = new EmailSender(user);
+				// await mail.sendGreetingMessage();
 
 				// set jwtToken in cookie
 				jwtToken(user, 200, req, res);
@@ -126,6 +134,12 @@ const verifyEmail = async (req, res) => {
 					status: "Success",
 					message: "Verification Successfull",
 					ethTransactionHash: ethTrx.hash,
+				});
+			}
+			else{
+				res.status(400).json({
+					status: "fail",
+					message: "incorrect Detail",
 				});
 			}
 		} catch (err) {
@@ -148,6 +162,10 @@ const verifyEmail = async (req, res) => {
 const getOtpForEmailConfirmation = catchAsync(async (req, res) => {
 	const email = req.body.email;
 	const user = await UserModel.findOne({ email });
+	// checking whether user exist or not
+	if (!user) {
+		return res.status(400).send("User does not Exist. Please register");
+	}
 	// check whether user email is already verified or not
 	if (!user.isEmailVerified) {
 		const [verificationOtp, expTime] = generateOTP();
@@ -175,6 +193,10 @@ const logout = catchAsync(async (req, res) => {
 
 const changePassword = catchAsync(async (req, res) => {
 	const user = await UserModel.findById(req.user.id).select("+pass");
+	// checking whether user exist or not
+	if (!user) {
+		return res.status(400).send("User does not Exist. Please register");
+	}
 	// check whether current password is correct or not
 	if (!(await user.validatePassword(req.body.currentPass, user.pass))) {
 		return res.status(401).json({

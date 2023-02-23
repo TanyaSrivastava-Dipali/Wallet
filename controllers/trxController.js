@@ -24,6 +24,12 @@ const transferFunds = async (req, res) => {
 				message: "Recepient address doesn't exist",
 			});
 		}
+		if (recepientUser.email === senderUser.email) {
+			return res.status(404).json({
+				status: "Fail",
+				message: "sender and receiver address can not be same",
+			});
+		}
 		// check whether user has sufficient balance to transfer or not
 		if (transaferAmount.gt(await tokenContractInstance.balanceOf(signer.address))) {
 			return res.status(401).json({
@@ -48,18 +54,18 @@ const transferFunds = async (req, res) => {
 			ethTRXHash: ethTrx.hash,
 		});
 		await trx.save();
-		const mailToSender = new EmailSender(senderUser);
-		await mailToSender.sendTransactionConfirmation(
-			trx.sender,trx.receiver,trx.amount,trx.ethTRXHash,
-			senderUser.walletAddress,
-			recepientUser.walletAddress
-		);
-		const mailToReceiver = new EmailSender(recepientUser);
-		await mailToReceiver.sendTransactionConfirmation(
-			trx.sender,trx.receiver,trx.amount,trx.ethTRXHash,
-			senderUser.walletAddress,
-			recepientUser.walletAddress
-		);
+		// const mailToSender = new EmailSender(senderUser);
+		// await mailToSender.sendTransactionConfirmation(
+		// 	trx.sender,trx.receiver,trx.amount,trx.ethTRXHash,
+		// 	senderUser.walletAddress,
+		// 	recepientUser.walletAddress
+		// );
+		// const mailToReceiver = new EmailSender(recepientUser);
+		// await mailToReceiver.sendTransactionConfirmation(
+		// 	trx.sender,trx.receiver,trx.amount,trx.ethTRXHash,
+		// 	senderUser.walletAddress,
+		// 	recepientUser.walletAddress
+		// );
 		res.status(200).json({
 			status: "Success",
 			message: "Transfer was successful",
@@ -116,7 +122,7 @@ const getTransactionDetail = catchAsync(async (req, res) => {
 	}
 	// chech whether transaction for given transaction hash  associated to requested user  or not
 	if (!trx.sender === req.user.email && !trx.receiver === req.user.email) {
-		return res.status(404).json({
+		return res.status(403).json({
 			status: "Fail",
 			message: "Access Denied.. You cannot access someone else's transaction details",
 		});
