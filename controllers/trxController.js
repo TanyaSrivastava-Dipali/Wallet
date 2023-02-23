@@ -1,5 +1,4 @@
 import ethers from "ethers";
-/* eslint-disable import/extensions */
 import UserModel from "../models/userModel.js";
 import trxModel from "../models/trxModel.js";
 import catchAsync from "../utils/catchAsync.js";
@@ -7,9 +6,6 @@ import { decrypt } from "../utils/encryptDecrypt.js";
 import EmailSender from "../utils/sendMail.js";
 import createTokenContractInstance from "../utils/createTokenInstance.js";
 
-
-
-// eslint-disable-next-line consistent-return
 const transferFunds = async (req, res) => {
 	try {
 		const senderUser = await UserModel.findOne({ email: req.user.email });
@@ -108,7 +104,6 @@ const getAllTransactions = catchAsync(async (req, res) => {
 	});
 });
 
-// eslint-disable-next-line consistent-return
 const getTransactionDetail = catchAsync(async (req, res) => {
 	const ethTRXHash = req.params.trxHash;
 	const trx = await trxModel.findOne({ ethTRXHash });

@@ -1,10 +1,8 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { ethers } from "ethers";
 import UserModel from "../models/userModel.js";
 import depositWithdrawModel from "../models/depositWithdrawModel.js";
 import createTokenContractInstance from "../utils/createTokenInstance.js";
 
-// eslint-disable-next-line consistent-return
 const getUser = async (req, res) => {
 	try {
 		const user = await UserModel.findOne({ email: req.body.email });
@@ -55,7 +53,6 @@ const getBalance = async (req, res) => {
 	}
 };
 
-// eslint-disable-next-line consistent-return
 const deposit = async (req, res) => {
 	try {
 		const User = await UserModel.findOne({ email: req.user.email });
@@ -114,7 +111,6 @@ const deposit = async (req, res) => {
 	}
 };
 
-// eslint-disable-next-line consistent-return
 const withdraw = async (req, res) => {
 	try {
 		const User = await UserModel.findOne({ email: req.user.email });

@@ -1,7 +1,6 @@
 import crypto from "crypto";
 import { ethers } from "ethers";
 import bip39 from "bip39";
-
 import UserModel from "../models/userModel.js";
 import EmailSender from "../utils/sendMail.js";
 import catchAsync from "../utils/catchAsync.js";
@@ -16,16 +15,14 @@ const register = catchAsync(async (req, res) => {
 		res.send("password not matched");
 		return;
 	}
-	// eslint-disable-next-line prefer-destructuring
 	const email = req.body.email;
 	const UserExist = await UserModel.findOne({ email });
 	// checking if user is already registered
 	if (UserExist) {
-		// eslint-disable-next-line consistent-return
 		return res.status(409).send("User Already Exist. Please Login");
 	}
 
-	// generatee otp to send for email verification
+	// generate otp to send for email verification
 	const [verificationOtp, expTime] = generateOTP();
 
 	// generate mnemonic for wallet creation
@@ -57,7 +54,6 @@ const register = catchAsync(async (req, res) => {
 	});
 });
 
-// eslint-disable-next-line consistent-return
 const login = catchAsync(async (req, res) => {
 	const { email, pass } = req.body;
 	if (!email || !pass) {
@@ -84,11 +80,10 @@ const login = catchAsync(async (req, res) => {
 	});
 });
 
-// eslint-disable-next-line consistent-return
 const verifyEmail = async (req, res) => {
 	// const session = await mongoose.startSession();
 	// session.startTransaction();
-	// eslint-disable-next-line prefer-destructuring
+
 	const email = req.body.email;
 	// const user = await UserModel.findOne({ email }, { session });
 	const user = await UserModel.findOne({ email });
@@ -151,7 +146,6 @@ const verifyEmail = async (req, res) => {
 };
 
 const getOtpForEmailConfirmation = catchAsync(async (req, res) => {
-	// eslint-disable-next-line prefer-destructuring
 	const email = req.body.email;
 	const user = await UserModel.findOne({ email });
 	// check whether user email is already verified or not
@@ -179,7 +173,6 @@ const logout = catchAsync(async (req, res) => {
 	res.status(200).json({ status: "logout successfully" });
 });
 
-// eslint-disable-next-line consistent-return
 const changePassword = catchAsync(async (req, res) => {
 	const user = await UserModel.findById(req.user.id).select("+pass");
 	// check whether current password is correct or not
@@ -203,7 +196,6 @@ const changePassword = catchAsync(async (req, res) => {
 	});
 });
 
-// eslint-disable-next-line consistent-return
 const getResetPassOtpAndResetPassword = catchAsync(async (req, res) => {
 	if (!req.body.target) {
 		return res.status(404).json({

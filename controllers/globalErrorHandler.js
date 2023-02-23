@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 
 dotenv.config({ path: "../.env" });
-// eslint-disable-next-line consistent-return
+
 const globalErrorHandler = async (err, req, res) => {
 	console.log(process.env.NODE_ENV);
 	console.log(err);

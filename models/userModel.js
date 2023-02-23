@@ -1,9 +1,8 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
-// eslint-disable-next-line import/no-extraneous-dependencies
-import validator from "validator";
 
+import validator from "validator";
 
 const userSchema = new mongoose.Schema({
 	name: {

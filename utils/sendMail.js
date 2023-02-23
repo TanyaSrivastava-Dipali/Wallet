@@ -1,6 +1,4 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
 import NodeMailer from "nodemailer";
-// eslint-disable-next-line import/newline-after-import
 import dotenv from "dotenv";
 dotenv.config({ path: "./.env" });
 

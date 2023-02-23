@@ -2,7 +2,6 @@ import Jwt from "jsonwebtoken";
 import UserModel from "../models/userModel.js";
 import catchAsync from "../utils/catchAsync.js";
 
-// eslint-disable-next-line consistent-return
 const isUserLoggedIn = catchAsync(async (req, res, next) => {
 	if (req.cookies.jwt) {
 		const token = req.cookies.jwt;
