@@ -78,7 +78,6 @@ userSchema.pre("save", async function (next) {
 	next();
 });
 userSchema.methods.validatePassword = async function (pass, userpass) {
-	// eslint-disable-next-line no-return-await
 	return await bcrypt.compare(pass, userpass);
 };
 
