@@ -1,6 +1,7 @@
 import crypto from "crypto";
 import { ethers } from "ethers";
 import bip39 from "bip39";
+import mongoose from "mongoose";
 import UserModel from "../models/userModel.js";
 import EmailSender from "../utils/sendMail.js";
 import catchAsync from "../utils/catchAsync.js";
@@ -85,19 +86,18 @@ const login = catchAsync(async (req, res) => {
 });
 
 const verifyEmail = async (req, res) => {
-	// const session = await mongoose.startSession();
-	// session.startTransaction();
+	const session = await mongoose.startSession();
+	session.startTransaction();
+	try {
+		const email = req.body.email;
+		const user = await UserModel.findOne({ email }, null, { session });
 
-	const email = req.body.email;
-	// const user = await UserModel.findOne({ email }, { session });
-	const user = await UserModel.findOne({ email });
-	// checking whether user exist or not
-	if (!user) {
-		return res.status(400).send("User does not Exist. Please register");
-	}
-	// check whether user email is already verified or not
-	if (!user.isEmailVerified) {
-		try {
+		// checking whether user exist or not
+		if (!user) {
+			return res.status(400).send("User does not Exist. Please register");
+		}
+		// check whether user email is already verified or not
+		if (!user.isEmailVerified) {
 			const now = new Date();
 			if (
 				req.body.otp === user.otpDetails.otp &&
@@ -120,9 +120,9 @@ const verifyEmail = async (req, res) => {
 				}
 				user.isEmailVerified = true;
 				user.otpDetails = undefined;
-				await user.save();
-				// await user.save({ session });
-				// await session.commitTransaction();
+				// await user.save();
+				await user.save({ session });
+				await session.commitTransaction();
 
 				// send mail to user with defined transport object
 				// const mail = new EmailSender(user);
@@ -135,27 +135,25 @@ const verifyEmail = async (req, res) => {
 					message: "Verification Successfull",
 					ethTransactionHash: ethTrx.hash,
 				});
-			}
-			else{
+			} else {
 				res.status(400).json({
 					status: "fail",
 					message: "incorrect Detail",
 				});
 			}
-		} catch (err) {
-			console.log(err);
-			// await session.abortTransaction();
-			res.status(400).json({
-				status: "Fail",
-				message: "Transaction failed",
-				err,
-			});
+		} else {
+			res.send("Email already verified");
 		}
-		// } finally {
-		// 	session.endSession();
-		// }
-	} else {
-		res.send("Email already verified");
+	} catch (err) {
+		console.log(err);
+		await session.abortTransaction();
+		res.status(400).json({
+			status: "Fail",
+			message: "Transaction failed",
+			err,
+		});
+	} finally {
+		session.endSession();
 	}
 };
 

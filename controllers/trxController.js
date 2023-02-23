@@ -1,4 +1,5 @@
 import ethers from "ethers";
+import mongoose from "mongoose";
 import UserModel from "../models/userModel.js";
 import trxModel from "../models/trxModel.js";
 import catchAsync from "../utils/catchAsync.js";
@@ -7,17 +8,20 @@ import EmailSender from "../utils/sendMail.js";
 import createTokenContractInstance from "../utils/createTokenInstance.js";
 
 const transferFunds = async (req, res) => {
+	const session = await mongoose.startSession();
+	session.startTransaction();
 	try {
-		const senderUser = await UserModel.findOne({ email: req.user.email });
+		const senderUser = await UserModel.findOne({ email: req.user.email }, null, { session });
 		// create token contract instance and retrieve signer by decrypting serder encrypted private key
 		const [tokenContractInstance, signer] = createTokenContractInstance(
 			decrypt(senderUser.encryptedPrivateKey)
 		);
+
 		const { recepientEmail, amountToTransfer } = req.body;
 		// format amount
 		const transaferAmount = ethers.utils.parseUnits(amountToTransfer, 18);
 		// chech whether Recepient user  exist or not
-		const recepientUser = await UserModel.findOne({ email: recepientEmail });
+		const recepientUser = await UserModel.findOne({ email: recepientEmail }, null, { session });
 		if (!recepientUser) {
 			return res.status(404).json({
 				status: "Fail",
@@ -37,23 +41,27 @@ const transferFunds = async (req, res) => {
 				message: "Sender doesn't have sufficient balance to transfer",
 			});
 		}
-		// transfer funds
+		const trx = await trxModel.create(
+			[
+				{
+				sender: senderUser.email,
+				receiver: recepientUser.email,
+				SenderWalletAddress: senderUser.walletAddress,
+				ReceiverWalletAddress: recepientUser.walletAddress,
+				amount: amountToTransfer,
+					ethTRXHash: "Null",
+				},
+			],
+			{ session }
+		);
 		const ethTrx = await tokenContractInstance
 			.connect(signer)
 			.transfer(recepientUser.walletAddress, transaferAmount);
 		if (!ethTrx) {
 			throw new Error("Transaction Failed");
 		}
-		// create new transaction
-		const trx = await trxModel.create({
-			sender: senderUser.email,
-			receiver: recepientUser.email,
-			SenderWalletAddress: senderUser.walletAddress,
-			ReceiverWalletAddress: recepientUser.walletAddress,
-			amount: amountToTransfer,
-			ethTRXHash: ethTrx.hash,
-		});
-		await trx.save();
+		await trxModel.findOneAndUpdate({ _id: trx[0]._id }, { ethTRXHash: ethTrx.hash }, { session });
+		await session.commitTransaction();
 		// const mailToSender = new EmailSender(senderUser);
 		// await mailToSender.sendTransactionConfirmation(
 		// 	trx.sender,trx.receiver,trx.amount,trx.ethTRXHash,
@@ -73,11 +81,14 @@ const transferFunds = async (req, res) => {
 			ethTransactionHash: ethTrx.hash,
 		});
 	} catch (err) {
+		await session.abortTransaction();
 		res.status(400).json({
 			status: "Fail",
 			message: "Transaction failed",
 			err,
 		});
+	} finally {
+		session.endSession();
 	}
 };
 

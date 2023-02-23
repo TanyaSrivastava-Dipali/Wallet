@@ -1,4 +1,5 @@
 import { ethers } from "ethers";
+import mongoose from "mongoose";
 import UserModel from "../models/userModel.js";
 import depositWithdrawModel from "../models/depositWithdrawModel.js";
 import createTokenContractInstance from "../utils/createTokenInstance.js";
@@ -54,8 +55,10 @@ const getBalance = async (req, res) => {
 };
 
 const deposit = async (req, res) => {
+	const session = await mongoose.startSession();
+	session.startTransaction();
 	try {
-		const User = await UserModel.findOne({ email: req.user.email });
+		const User = await UserModel.findOne({ email: req.user.email }, null, { session });
 		// check whether user with given email exist or not
 		if (!User) {
 			return res.status(404).json({
@@ -63,7 +66,6 @@ const deposit = async (req, res) => {
 				message: " user doesn't exist",
 			});
 		}
-
 		// create token contract instance
 		const [tokenContractInstance, signer] = createTokenContractInstance(
 			process.env.ADMIN_PRIVATE_KEY
@@ -77,20 +79,30 @@ const deposit = async (req, res) => {
 				message: "amount should be grater than 0",
 			});
 		}
+		// create new transaction
+		const trx = await depositWithdrawModel.create(
+			[
+				{
+					AddressTo: User.email,
+					userWalletAddress: User.walletAddress,
+					amount: Amt,
+					action: "deposit",
+					ethTRXHash: "Null",
+				},
+			],
+			{ session }
+		);
 		// mint
 		const ethTrx = await tokenContractInstance.connect(signer).mint(User.walletAddress, Amt);
 		if (!ethTrx) {
 			throw new Error("Transaction Failed");
 		}
-		// create new transaction
-		const trx = await depositWithdrawModel.create({
-			AddressTo: User.email,
-			userWalletAddress: User.walletAddress,
-			amount: Amt,
-			action: "deposit",
-			ethTRXHash: ethTrx.hash,
-		});
-		await trx.save();
+		await depositWithdrawModel.findOneAndUpdate(
+			{ _id: trx[0]._id },
+			{ ethTRXHash: ethTrx.hash },
+			{ session }
+		);
+		await session.commitTransaction();
 		// const mail = new EmailSender(User);
 		// await mail.sendDepositConfirmation(
 		// 	trx[0],
@@ -103,17 +115,22 @@ const deposit = async (req, res) => {
 			ethTransactionHash: ethTrx.hash,
 		});
 	} catch (err) {
+		await session.abortTransaction();
 		res.status(400).json({
 			status: "Fail",
 			message: "Transaction failed",
 			err,
 		});
+	} finally {
+		session.endSession();
 	}
 };
 
 const withdraw = async (req, res) => {
+	const session = await mongoose.startSession();
+	session.startTransaction();
 	try {
-		const User = await UserModel.findOne({ email: req.user.email });
+		const User = await UserModel.findOne({ email: req.user.email }, null, { session });
 		// check whether user with given email exist or not
 		if (!User) {
 			return res.status(404).json({
@@ -135,20 +152,30 @@ const withdraw = async (req, res) => {
 				message: "amount should be grater than 0 and less than user balance",
 			});
 		}
+		// create new transaction
+		const trx = await depositWithdrawModel.create(
+			[
+				{
+					AddressFrom: User.email,
+					userWalletAddress: User.walletAddress,
+					amount: Amt,
+					action: "withdraw",
+					ethTRXHash: "Null",
+				},
+			],
+			{ session }
+		);
 		// burn
 		const ethTrx = await tokenContractInstance.connect(signer).burn(User.walletAddress, Amt);
 		if (!ethTrx) {
 			throw new Error("Transaction Failed");
 		}
-		// create new transaction
-		const trx = await depositWithdrawModel.create({
-			AddressFrom: User.email,
-			userWalletAddress: User.walletAddress,
-			amount: Amt,
-			action: "withdraw",
-			ethTRXHash: ethTrx.hash,
-		});
-		await trx.save();
+		await depositWithdrawModel.findOneAndUpdate(
+			{ _id: trx[0]._id },
+			{ ethTRXHash: ethTrx.hash },
+			{ session }
+		);
+		await session.commitTransaction();
 		// const mail = new EmailSender(User);
 		// await mail.sendWithdrawConfirmation(
 		// 	trx[0],
@@ -161,11 +188,14 @@ const withdraw = async (req, res) => {
 			ethTransactionHash: ethTrx.hash,
 		});
 	} catch (err) {
+		await session.abortTransaction();
 		res.status(400).json({
 			status: "Fail",
 			message: "Transaction failed",
 			err,
 		});
+	} finally {
+		session.endSession();
 	}
 };
 
