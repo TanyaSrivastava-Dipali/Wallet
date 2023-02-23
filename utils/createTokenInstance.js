@@ -1,6 +1,5 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { ethers } from "ethers";
-// eslint-disable-next-line import/extensions
 import ABI from "./tokenABI.js";
 
 const createTokenContractInstance = (key) => {

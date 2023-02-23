@@ -1,13 +1,13 @@
+import ethers from "ethers";
 /* eslint-disable import/extensions */
-// eslint-disable-next-line import/extensions
 import UserModel from "../models/userModel.js";
 import trxModel from "../models/trxModel.js";
 import catchAsync from "../utils/catchAsync.js";
 import { decrypt } from "../utils/encryptDecrypt.js";
 import EmailSender from "../utils/sendMail.js";
 import createTokenContractInstance from "../utils/createTokenInstance.js";
-// eslint-disable-next-line import/order
-import ethers from "ethers";
+
+
 
 // eslint-disable-next-line consistent-return
 const transferFunds = async (req, res) => {

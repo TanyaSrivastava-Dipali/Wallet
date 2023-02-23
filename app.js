@@ -1,11 +1,7 @@
 import express from "express";
 import cookieParser from "cookie-parser";
-
-// eslint-disable-next-line import/extensions
 import userRouter from "./routes/userRoutes.js";
-// eslint-disable-next-line import/extensions
 import trxRouter from "./routes/trxRoutes.js";
-// eslint-disable-next-line import/extensions
 import globalErrorHandler from "./controllers/globalErrorHandler.js";
 
 const app = express();

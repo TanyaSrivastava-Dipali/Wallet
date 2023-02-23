@@ -15,5 +15,12 @@
     "rules": {
         "no-unused-vars": "error",
         "no-console": "off"
-    }
+    },
+    "import/extensions": [
+        "error",
+        "ignorePackages",
+        {
+          "js": "never"
+        }
+     ],
 }

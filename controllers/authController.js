@@ -1,23 +1,14 @@
-// eslint-disable-next-line import/extensions
-import UserModel from "../models/userModel.js";
-// eslint-disable-next-line import/extensions
-import EmailSender from "../utils/sendMail.js";
-// eslint-disable-next-line import/extensions
-import catchAsync from "../utils/catchAsync.js";
-// eslint-disable-next-line import/extensions
-import generateOTP from "../utils/otpGenerator.js";
-// eslint-disable-next-line import/extensions
-import jwtToken from "../utils/jwtToken.js";
-// eslint-disable-next-line import/extensions
-import createTokenContractInstance from "../utils/createTokenInstance.js";
-// eslint-disable-next-line import/extensions
-import { encrypt } from "../utils/encryptDecrypt.js";
-// eslint-disable-next-line import/order
 import crypto from "crypto";
-// eslint-disable-next-line import/no-extraneous-dependencies, import/order
 import { ethers } from "ethers";
-// eslint-disable-next-line import/no-extraneous-dependencies, import/order
 import bip39 from "bip39";
+
+import UserModel from "../models/userModel.js";
+import EmailSender from "../utils/sendMail.js";
+import catchAsync from "../utils/catchAsync.js";
+import generateOTP from "../utils/otpGenerator.js";
+import jwtToken from "../utils/jwtToken.js";
+import createTokenContractInstance from "../utils/createTokenInstance.js";
+import { encrypt } from "../utils/encryptDecrypt.js";
 
 // register user
 const register = catchAsync(async (req, res) => {

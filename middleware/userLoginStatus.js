@@ -1,7 +1,5 @@
 import Jwt from "jsonwebtoken";
-// eslint-disable-next-line import/extensions
 import UserModel from "../models/userModel.js";
-// eslint-disable-next-line import/extensions
 import catchAsync from "../utils/catchAsync.js";
 
 // eslint-disable-next-line consistent-return

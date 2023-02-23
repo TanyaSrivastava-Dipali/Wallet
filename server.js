@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 import dotenv from "dotenv";
-// eslint-disable-next-line import/extensions
 import app from "./app.js";
 
 dotenv.config({ path: "./.env" });

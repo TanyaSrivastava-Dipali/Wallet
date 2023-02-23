@@ -1,11 +1,7 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { ethers } from "ethers";
-// eslint-disable-next-line import/extensions
 import UserModel from "../models/userModel.js";
-
-// eslint-disable-next-line import/extensions
 import depositWithdrawModel from "../models/depositWithdrawModel.js";
-// eslint-disable-next-line import/extensions
 import createTokenContractInstance from "../utils/createTokenInstance.js";
 
 // eslint-disable-next-line consistent-return

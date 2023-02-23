@@ -1,11 +1,7 @@
 import express from "express";
-// eslint-disable-next-line import/extensions
 import * as UserController from "../controllers/userController.js";
-// eslint-disable-next-line import/extensions
 import * as AuthController from "../controllers/authController.js";
-// eslint-disable-next-line import/extensions
 import verify from "../middleware/verify.js";
-// eslint-disable-next-line import/extensions
 import isUserLoggedIn from "../middleware/userLoginStatus.js";
 
 const userRouter = express.Router();

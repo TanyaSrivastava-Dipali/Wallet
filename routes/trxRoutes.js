@@ -1,8 +1,5 @@
 import express from "express";
-
-// eslint-disable-next-line import/extensions
 import * as trxController from "../controllers/trxController.js";
-// eslint-disable-next-line import/extensions
 import isUserLoggedIn from "../middleware/userLoginStatus.js";
 
 const trxRouter = express.Router();
