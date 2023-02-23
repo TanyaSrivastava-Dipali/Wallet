@@ -66,15 +66,15 @@ class EmailSender {
 		await this.transport.sendMail(mailOptions);
 	}
 
-	async sendTransactionConfirmation(trx, senderAddress, receiverAddress) {
+	async sendTransactionConfirmation(sender,receiver,amount,ethTRXHash,senderAddress, receiverAddress) {
 		const mailOptions = {
 			from: this.from,
 			to: this.to,
 			subject: "Transaction Confirmation Receipt",
-			text: `Transaction was successful, From: ${trx.sender}(${senderAddress}) => To: ${trx.receiver}(${receiverAddress}), of Amount: ${trx.amount}, with transaction id of ${trx.id}`,
+			text: `Transaction was successful, From: ${sender}(${senderAddress}) => To: ${receiver}(${receiverAddress}), of Amount: ${amount}, with transaction hash of ${ethTRXHash}`,
 			html: `
             <h2>Dear user
-            <h4>Transaction was successful, From: ${trx.sender}(${senderAddress}) => To: ${trx.receiver}(${receiverAddress}), of Amount: ${trx.amount}, with transaction id of ${trx.id}</h4>
+            <h4>Transaction was successful, From: ${sender}(${senderAddress}) => To: ${receiver}(${receiverAddress}), of Amount: ${amount}, with transaction hash of ${ethTRXHash}</h4>
            <br/>
            <h4>Use Polygonscan to expore details of transaction</h4>`,
 		};

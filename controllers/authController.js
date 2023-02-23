@@ -46,8 +46,8 @@ const register = catchAsync(async (req, res) => {
 	});
 
 	const savedUser = await user.save();
-	// const mail = new EmailSender(savedUser);
-	// await mail.sendEmailVerification(verificationOtp);
+	const mail = new EmailSender(savedUser);
+	await mail.sendEmailVerification(verificationOtp);
 	res.status(201).json({
 		status: "success",
 		savedUser,
@@ -116,9 +116,9 @@ const verifyEmail = async (req, res) => {
 				// await user.save({ session });
 				// await session.commitTransaction();
 
-				// // send mail to user with defined transport object
-				// const mail = new EmailSender(user);
-				// await mail.sendGreetingMessage();
+				// send mail to user with defined transport object
+				const mail = new EmailSender(user);
+				await mail.sendGreetingMessage();
 
 				// set jwtToken in cookie
 				jwtToken(user, 200, req, res);

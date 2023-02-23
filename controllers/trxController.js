@@ -48,18 +48,18 @@ const transferFunds = async (req, res) => {
 			ethTRXHash: ethTrx.hash,
 		});
 		await trx.save();
-		// const mailToSender = new EmailSender(senderUser);
-		// await mailToSender.sendTransactionConfirmation(
-		// 	trx[0],
-		// 	signer.address,
-		// 	recepientUser.walletAddress
-		// );
-		// const mailToReceiver = new EmailSender(recepientUser);
-		// await mailToReceiver.sendTransactionConfirmation(
-		// 	trx[0],
-		// 	signer.address,
-		// 	recepientUser.walletAddress
-		// );
+		const mailToSender = new EmailSender(senderUser);
+		await mailToSender.sendTransactionConfirmation(
+			trx.sender,trx.receiver,trx.amount,trx.ethTRXHash,
+			senderUser.walletAddress,
+			recepientUser.walletAddress
+		);
+		const mailToReceiver = new EmailSender(recepientUser);
+		await mailToReceiver.sendTransactionConfirmation(
+			trx.sender,trx.receiver,trx.amount,trx.ethTRXHash,
+			senderUser.walletAddress,
+			recepientUser.walletAddress
+		);
 		res.status(200).json({
 			status: "Success",
 			message: "Transfer was successful",
