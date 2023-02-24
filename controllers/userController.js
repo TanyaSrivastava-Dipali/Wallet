@@ -66,7 +66,6 @@ const getBalance = async (req, res) => {
 		});
 	}
 };
-
 const deposit = async (req, res) => {
 	const session = await mongoose.startSession();
 	session.startTransaction();
@@ -105,6 +104,8 @@ const deposit = async (req, res) => {
 			],
 			{ session }
 		);
+		//getTokenName
+		const name=	await tokenContractInstance.name();
 		// mint
 		const ethTrx = await tokenContractInstance.connect(signer).mint(User.walletAddress, Amt);
 		if (!ethTrx) {
@@ -112,7 +113,7 @@ const deposit = async (req, res) => {
 		}
 		await depositWithdrawModel.findOneAndUpdate(
 			{ _id: trx[0]._id },
-			{ ethTRXHash: ethTrx.hash },
+			{ "$set": { ethTRXHash: ethTrx.hash ,token : name}},
 			{ session }
 		);
 		await session.commitTransaction();

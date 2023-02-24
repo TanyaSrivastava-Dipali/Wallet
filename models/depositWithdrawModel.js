@@ -32,6 +32,10 @@ const depositWithdrawSchema = new mongoose.Schema({
 		type: Date,
 		default: Date.now(),
 	},
+	token:{
+		type: String,
+		require: [true, "token name must be specified"],
+	},
 	ethTRXHash: {
 		type: String,
 		require: [true, "Ethereum transaction hash is required"],
