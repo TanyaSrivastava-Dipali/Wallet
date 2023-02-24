@@ -9,6 +9,7 @@ import generateOTP from "../utils/otpGenerator.js";
 import jwtToken from "../utils/jwtToken.js";
 import createTokenContractInstance from "../utils/createTokenInstance.js";
 import { encrypt } from "../utils/encryptDecrypt.js";
+import tokenArray from "../utils/tokenArray.js";
 
 // register user
 const register = catchAsync(async (req, res) => {
@@ -16,7 +17,7 @@ const register = catchAsync(async (req, res) => {
 		res.send("password not matched");
 		return;
 	}
-	const email = req.body.email;
+	const { email } = req.body;
 	const UserExist = await UserModel.findOne({ email });
 	// checking if user is already registered
 	if (UserExist) {
@@ -89,7 +90,7 @@ const verifyEmail = async (req, res) => {
 	const session = await mongoose.startSession();
 	session.startTransaction();
 	try {
-		const email = req.body.email;
+		const { email } = req.body;
 		const user = await UserModel.findOne({ email }, null, { session });
 
 		// checking whether user exist or not
@@ -103,20 +104,29 @@ const verifyEmail = async (req, res) => {
 				req.body.otp === user.otpDetails.otp &&
 				now.getUTCSeconds() <= user.otpDetails.otpExpiration
 			) {
-				// create token contract instance and get signer
-				const [tokenContractInstance, signer] = createTokenContractInstance(
-					process.env.ADMIN_PRIVATE_KEY
-				);
+				const provider = new ethers.providers.JsonRpcProvider("http://127.0.0.1:8545/");
+				const signer = new ethers.Wallet(process.env.ADMIN_PRIVATE_KEY, provider);
 				await signer.sendTransaction({
 					to: user.walletAddress,
-					value: ethers.utils.parseEther("1.0"),
+					value: ethers.utils.parseEther("2.0"),
 				});
+				
+				const sendReward = async (tokenContractAddress) => {
+					// create token contract instance and get signer
+					const [tokenContractInstance, signer] = createTokenContractInstance(
+						process.env.ADMIN_PRIVATE_KEY,
+						tokenContractAddress
+					);
+					const ethTrx = await tokenContractInstance
+						.connect(signer)
+						.mint(user.walletAddress, ethers.utils.parseUnits("1000", 18));
+					if (!ethTrx) {
+						throw new Error("Transaction Failed");
+					}
+				};
 				// send token as joining reward
-				const ethTrx = await tokenContractInstance
-					.connect(signer)
-					.mint(user.walletAddress, ethers.utils.parseUnits("1000", 18));
-				if (!ethTrx) {
-					throw new Error("Transaction Failed");
+				for (let tokenContractAddress in tokenArray) {
+					await sendReward(tokenArray[tokenContractAddress]);
 				}
 				user.isEmailVerified = true;
 				user.otpDetails = undefined;
@@ -133,7 +143,6 @@ const verifyEmail = async (req, res) => {
 				res.status(200).json({
 					status: "Success",
 					message: "Verification Successfull",
-					ethTransactionHash: ethTrx.hash,
 				});
 			} else {
 				res.status(400).json({
@@ -158,7 +167,7 @@ const verifyEmail = async (req, res) => {
 };
 
 const getOtpForEmailConfirmation = catchAsync(async (req, res) => {
-	const email = req.body.email;
+	const { email } = req.body;
 	const user = await UserModel.findOne({ email });
 	// checking whether user exist or not
 	if (!user) {

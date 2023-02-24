@@ -14,7 +14,7 @@ const transferFunds = async (req, res) => {
 		const senderUser = await UserModel.findOne({ email: req.user.email }, null, { session });
 		// create token contract instance and retrieve signer by decrypting serder encrypted private key
 		const [tokenContractInstance, signer] = createTokenContractInstance(
-			decrypt(senderUser.encryptedPrivateKey)
+			decrypt(senderUser.encryptedPrivateKey),req.body.tokenAddress
 		);
 
 		const { recepientEmail, amountToTransfer } = req.body;

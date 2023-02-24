@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import UserModel from "../models/userModel.js";
 import depositWithdrawModel from "../models/depositWithdrawModel.js";
 import createTokenContractInstance from "../utils/createTokenInstance.js";
+import tokenArray from "../utils/tokenArray.js";
 
 const getUser = async (req, res) => {
 	try {
@@ -28,8 +29,6 @@ const getUser = async (req, res) => {
 };
 const getBalance = async (req, res) => {
 	try {
-		// create token contract instance
-		const [tokenContractInstance] = createTokenContractInstance(process.env.ADMIN_PRIVATE_KEY);
 		const { email } = req.body;
 		const user = await UserModel.findOne({ email });
 		if (!user) {
@@ -38,12 +37,26 @@ const getBalance = async (req, res) => {
 				message: "User does not exist",
 			});
 		}
-		// check balance
-		let balance = await tokenContractInstance.balanceOf(user.walletAddress);
-		balance = ethers.utils.formatUnits(balance, 18);
+		const balance= new Map();;
+		const checkBalance = async (tokenContractAddress) => {
+			// create token contract instance and get signer
+			const [tokenContractInstance, signer] = createTokenContractInstance(
+				process.env.ADMIN_PRIVATE_KEY,
+				tokenContractAddress
+			);
+			// check balance
+		let name= await tokenContractInstance.name();
+		let bal = await tokenContractInstance.balanceOf(user.walletAddress);
+		balance.set(name, ethers.utils.formatUnits(bal, 18));
+		};
+		// send token as joining reward
+		for (let tokenContractAddress in tokenArray) {
+			await checkBalance(tokenArray[tokenContractAddress]);
+		}
+		const bal=[...balance]
 		res.status(200).json({
 			status: "Success",
-			balance,
+			bal
 		});
 	} catch (err) {
 		console.log(err);
@@ -68,7 +81,7 @@ const deposit = async (req, res) => {
 		}
 		// create token contract instance
 		const [tokenContractInstance, signer] = createTokenContractInstance(
-			process.env.ADMIN_PRIVATE_KEY
+			process.env.ADMIN_PRIVATE_KEY,req.body.tokenAddress
 		);
 		const { amount } = req.body;
 		const Amt = ethers.utils.parseUnits(amount, 18);
@@ -140,7 +153,7 @@ const withdraw = async (req, res) => {
 		}
 		// create token contract instance
 		const [tokenContractInstance, signer] = createTokenContractInstance(
-			process.env.ADMIN_PRIVATE_KEY
+			process.env.ADMIN_PRIVATE_KEY,req.body.tokenAddress
 		);
 		const { amount } = req.body;
 		const Amt = ethers.utils.parseUnits(amount, 18);

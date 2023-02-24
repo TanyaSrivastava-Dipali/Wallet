@@ -2,7 +2,7 @@ import UserModel from "../models/userModel.js";
 import catchAsync from "../utils/catchAsync.js";
 
 const verify = catchAsync(async (req, res, next) => {
-	const email = req.body.email;
+	const {email} = req.body;
 	const user = await UserModel.findOne({ email });
 	if (!user) {
 		return res.status(404).json({
