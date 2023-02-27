@@ -45,6 +45,7 @@
 		"eslint-plugin-import": "^2.27.5",
 		"eslint-plugin-prettier": "^4.2.1",
 		"hardhat": "^2.12.7",
+		"parallelshell": "^3.0.1",
 		"prettier": "^2.8.4"
 	}
 }

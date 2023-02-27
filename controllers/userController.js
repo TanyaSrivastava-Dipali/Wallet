@@ -1,9 +1,11 @@
-import { ethers } from "ethers";
+import  ethers  from "ethers";
 import mongoose from "mongoose";
 import UserModel from "../models/userModel.js";
 import depositWithdrawModel from "../models/depositWithdrawModel.js";
 import createTokenContractInstance from "../utils/createTokenInstance.js";
 import tokenArray from "../utils/tokenArray.js";
+import EmailSender from "../utils/sendMail.js";
+import { decrypt } from "../utils/encryptDecrypt.js";
 
 const getUser = async (req, res) => {
 	try {
@@ -145,17 +147,17 @@ const withdraw = async (req, res) => {
 	session.startTransaction();
 	try {
 		const User = await UserModel.findOne({ email: req.user.email }, null, { session });
-		// check whether user with given email exist or not
-		if (!User) {
-			return res.status(404).json({
-				status: "Fail",
-				message: " user doesn't exist",
-			});
-		}
-		// create token contract instance
-		const [tokenContractInstance, signer] = createTokenContractInstance(
-			process.env.ADMIN_PRIVATE_KEY,req.body.tokenAddress
-		);
+			// create token contract instance and retrieve signer by decrypting serder encrypted private key
+			const [tokenContractInstance, signer] = createTokenContractInstance(
+				decrypt( User.encryptedPrivateKey ),req.body.tokenAddress
+			);
+		const to = await UserModel.findOne({ email: req.body.toEmail }, null, { session });
+	  if (!to) {
+		return res.status(404).json({
+			status: "Fail",
+			message: "to address doesn't exist",
+		});
+	}
 		const { amount } = req.body;
 		const Amt = ethers.utils.parseUnits(amount, 18);
 
@@ -172,24 +174,32 @@ const withdraw = async (req, res) => {
 				{
 					AddressFrom: User.email,
 					userWalletAddress: User.walletAddress,
-					amount: Amt,
+					amount: Amt,	// const mail = new EmailSender(User);
+					// await mail.sendDepositConfirmation(
+					// 	trx[0],
+					// 	User.walletAddress
+					// );
 					action: "withdraw",
 					ethTRXHash: "Null",
 				},
 			],
 			{ session }
 		);
-		// burn
-		const ethTrx = await tokenContractInstance.connect(signer).burn(User.walletAddress, Amt);
-		if (!ethTrx) {
-			throw new Error("Transaction Failed");
-		}
-		await depositWithdrawModel.findOneAndUpdate(
-			{ _id: trx[0]._id },
-			{ ethTRXHash: ethTrx.hash },
-			{ session }
-		);
+	//getTokenName
+	const name=	await tokenContractInstance.name();
+	//transfer
+	const ethTrx = await tokenContractInstance
+		.connect(signer)
+		.transfer(to.walletAddress, Amt);
+	if (!ethTrx) {
+		throw new Error("Transaction Failed");
+	}
+	await depositWithdrawModel.findOneAndUpdate(
+		{ _id: trx[0]._id },
+		{ "$set": { ethTRXHash: ethTrx.hash ,token : name}},
+		{ session });
 		await session.commitTransaction();
+		
 		// const mail = new EmailSender(User);
 		// await mail.sendWithdrawConfirmation(
 		// 	trx[0],

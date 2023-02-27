@@ -14,7 +14,8 @@ const transferFunds = async (req, res) => {
 		const senderUser = await UserModel.findOne({ email: req.user.email }, null, { session });
 		// create token contract instance and retrieve signer by decrypting serder encrypted private key
 		const [tokenContractInstance, signer] = createTokenContractInstance(
-			decrypt(senderUser.encryptedPrivateKey),req.body.tokenAddress
+			decrypt(senderUser.encryptedPrivateKey),
+			req.body.tokenAddress
 		);
 
 		const { recepientEmail, amountToTransfer } = req.body;
@@ -44,33 +45,39 @@ const transferFunds = async (req, res) => {
 		const trx = await trxModel.create(
 			[
 				{
-				sender: senderUser.email,
-				receiver: recepientUser.email,
-				SenderWalletAddress: senderUser.walletAddress,
-				ReceiverWalletAddress: recepientUser.walletAddress,
-				amount: amountToTransfer,
+					sender: senderUser.email,
+					receiver: recepientUser.email,
+					SenderWalletAddress: senderUser.walletAddress,
+					ReceiverWalletAddress: recepientUser.walletAddress,
+					amount: amountToTransfer,
 					ethTRXHash: "Null",
 				},
 			],
 			{ session }
 		);
+		//getTokenName
+		const name = await tokenContractInstance.name();
 		const ethTrx = await tokenContractInstance
 			.connect(signer)
 			.transfer(recepientUser.walletAddress, transaferAmount);
 		if (!ethTrx) {
 			throw new Error("Transaction Failed");
 		}
-		await trxModel.findOneAndUpdate({ _id: trx[0]._id }, { ethTRXHash: ethTrx.hash }, { session });
+		await trxModel.findOneAndUpdate(
+			{ _id: trx[0]._id },
+			{ $set: { ethTRXHash: ethTrx.hash, token: name } },
+			{ session }
+		);
 		await session.commitTransaction();
 		// const mailToSender = new EmailSender(senderUser);
 		// await mailToSender.sendTransactionConfirmation(
-		// 	trx.sender,trx.receiver,trx.amount,trx.ethTRXHash,
+		// 	senderUser.email,recepientUser.email,trx.amount,trx.ethTRXHash,
 		// 	senderUser.walletAddress,
 		// 	recepientUser.walletAddress
 		// );
 		// const mailToReceiver = new EmailSender(recepientUser);
 		// await mailToReceiver.sendTransactionConfirmation(
-		// 	trx.sender,trx.receiver,trx.amount,trx.ethTRXHash,
+		// 	senderUser.email,recepientUser.email,trx.amount,trx.ethTRXHash,
 		// 	senderUser.walletAddress,
 		// 	recepientUser.walletAddress
 		// );
@@ -143,5 +150,6 @@ const getTransactionDetail = catchAsync(async (req, res) => {
 		transaction: trx,
 	});
 });
+
 
 export { getTransactionDetail, getAllTransactions, transferFunds };

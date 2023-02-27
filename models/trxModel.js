@@ -30,6 +30,10 @@ const transactionSchema = new mongoose.Schema({
 		type: Number,
 		require: [true, "Amount must be specified"],
 	},
+	token:{
+		type: String,
+		require: [true, "token name must be specified"],
+	},
 	trxTimeStamp: {
 		type: Date,
 		default: Date.now(),
