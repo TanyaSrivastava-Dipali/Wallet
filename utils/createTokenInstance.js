@@ -2,7 +2,7 @@ import { ethers } from "ethers";
 import ABI from "./tokenABI.js";
 
 const createTokenContractInstance = (key,tokenContractAddress) => {
-	const provider = new ethers.providers.JsonRpcProvider("http://127.0.0.1:8545/");
+	const provider = new ethers.providers.JsonRpcProvider(process.env.MUMBAI_URL);
 	const signer = new ethers.Wallet(key || process.env.ADMIN_PRIVATE_KEY, provider);
 	const tokenContractInstance = new ethers.Contract(
 		tokenContractAddress,

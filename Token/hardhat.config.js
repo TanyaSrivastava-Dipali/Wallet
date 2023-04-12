@@ -26,6 +26,8 @@ module.exports = {
 		mumbai: {
 			url: process.env.MUMBAI_URL || "",
 			accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+			gas: 2100000,
+			gasPrice: 8000000000,
 		},
 	},
 	etherscan: {

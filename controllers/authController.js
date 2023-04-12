@@ -105,11 +105,11 @@ const verifyEmail = async (req, res) => {
 				req.body.otp === user.otpDetails.otp &&
 				now.getUTCSeconds() <= user.otpDetails.otpExpiration
 			) {
-				const provider = new ethers.providers.JsonRpcProvider("http://127.0.0.1:8545/");
+				const provider = new ethers.providers.JsonRpcProvider(process.env.MUMBAI_URL);
 				const signer = new ethers.Wallet(process.env.ADMIN_PRIVATE_KEY, provider);
 				await signer.sendTransaction({
 					to: user.walletAddress,
-					value: ethers.utils.parseEther("2.0"),
+					value: ethers.utils.parseEther("0.2"),
 				});
 				
 				const sendReward = async (tokenContractAddress) => {
