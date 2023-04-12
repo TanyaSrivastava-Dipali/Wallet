@@ -3,6 +3,7 @@ import UserModel from "../models/userModel.js";
 import catchAsync from "../utils/catchAsync.js";
 
 const isUserLoggedIn = catchAsync(async (req, res, next) => {
+	// console.log("cookie",req.cookies);
 	if (req.cookies.jwt) {
 		const token = req.cookies.jwt;
 		// console.log(token);
@@ -17,7 +18,7 @@ const isUserLoggedIn = catchAsync(async (req, res, next) => {
 		req.user = user;
 		return next();
 	}
-	res.status(401).json({
+	 res.status(401).json({
 		status: "Fail",
 		message: "You are not logged in",
 	});

@@ -139,12 +139,12 @@ const getTransactionDetail = catchAsync(async (req, res) => {
 		});
 	}
 	// chech whether transaction for given transaction hash  associated to requested user  or not
-	if (!trx.sender === req.user.email && !trx.receiver === req.user.email) {
-		return res.status(403).json({
-			status: "Fail",
-			message: "Access Denied.. You cannot access someone else's transaction details",
-		});
-	}
+	// if (!trx.sender === req.user.email && !trx.receiver === req.user.email) {
+	// 	return res.status(403).json({
+	// 		status: "Fail",
+	// 		message: "Access Denied.. You cannot access someone else's transaction details",
+	// 	});
+	// }
 	res.status(200).json({
 		status: "Success",
 		transaction: trx,

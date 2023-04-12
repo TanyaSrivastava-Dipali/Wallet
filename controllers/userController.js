@@ -9,7 +9,7 @@ import { decrypt } from "../utils/encryptDecrypt.js";
 
 const getUser = async (req, res) => {
 	try {
-		const user = await UserModel.findOne({ email: req.body.email });
+		const user = await UserModel.findOne({ email: req.params.email });
 		// check whether user with given email exist or not
 		if (!user) {
 			return res.status(404).json({
@@ -31,7 +31,7 @@ const getUser = async (req, res) => {
 };
 const getBalance = async (req, res) => {
 	try {
-		const { email } = req.body;
+		const email  = req.params.email;
 		const user = await UserModel.findOne({ email });
 		if (!user) {
 			return res.status(404).json({
@@ -147,7 +147,14 @@ const withdraw = async (req, res) => {
 	session.startTransaction();
 	try {
 		const User = await UserModel.findOne({ email: req.user.email }, null, { session });
-			// create token contract instance and retrieve signer by decrypting serder encrypted private key
+			// check whether user with given email exist or not
+			if (!User) {
+				return res.status(404).json({
+					status: "Fail",
+					message: " user doesn't exist",
+				});
+			}	
+		// create token contract instance and retrieve signer by decrypting serder encrypted private key
 			const [tokenContractInstance, signer] = createTokenContractInstance(
 				decrypt( User.encryptedPrivateKey ),req.body.tokenAddress
 			);
@@ -165,7 +172,7 @@ const withdraw = async (req, res) => {
 		if (Amt.lt(0) && Amt.gt(await tokenContractInstance.balanceOf(User.walletAddress))) {
 			return res.status(401).json({
 				status: "Fail",
-				message: "amount should be grater than 0 and less than user balance",
+				message: "amount should be greater than 0 and less than user balance",
 			});
 		}
 		// create new transaction
@@ -174,11 +181,7 @@ const withdraw = async (req, res) => {
 				{
 					AddressFrom: User.email,
 					userWalletAddress: User.walletAddress,
-					amount: Amt,	// const mail = new EmailSender(User);
-					// await mail.sendDepositConfirmation(
-					// 	trx[0],
-					// 	User.walletAddress
-					// );
+					amount: Amt,
 					action: "withdraw",
 					ethTRXHash: "Null",
 				},

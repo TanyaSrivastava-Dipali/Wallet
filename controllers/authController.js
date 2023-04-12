@@ -83,6 +83,7 @@ const login = catchAsync(async (req, res) => {
 	res.status(200).json({
 		status: "Success",
 		message: "login Successfully",
+		name:User.name,
 	});
 });
 
@@ -151,7 +152,7 @@ const verifyEmail = async (req, res) => {
 				});
 			}
 		} else {
-			res.send("Email already verified");
+			res.status(302).send("Email already verified");
 		}
 	} catch (err) {
 		console.log(err);
@@ -167,7 +168,7 @@ const verifyEmail = async (req, res) => {
 };
 
 const getOtpForEmailConfirmation = catchAsync(async (req, res) => {
-	const { email } = req.body;
+	const email  = req.body.email;
 	const user = await UserModel.findOne({ email });
 	// checking whether user exist or not
 	if (!user) {
@@ -181,9 +182,9 @@ const getOtpForEmailConfirmation = catchAsync(async (req, res) => {
 		await user.save();
 		// const mail = new EmailSender(user);
 		// await mail.sendEmailVerification(verificationOtp);
-		res.send("OTP sent successfully");
+		res.status(200).send("OTP sent successfully");
 	} else {
-		res.send({
+		res.status(302).send({
 			message: "Email Already Verified.",
 		});
 	}
@@ -242,6 +243,7 @@ const getResetPassOtpAndResetPassword = catchAsync(async (req, res) => {
 		}
 		const passResetToken = user.createPasswordResetToken();
 		await user.save({ validateBeforeSave: false });
+		console.log(passResetToken);
 		// const mail = new EmailSender(user);
 		// await mail.sendPasswordResetToken(passResetToken);
 		res.status(200).json({
@@ -254,12 +256,11 @@ const getResetPassOtpAndResetPassword = catchAsync(async (req, res) => {
 			.createHash("sha256")
 			.update(req.body.passResetToken)
 			.digest("hex");
-		const user = await UserModel.findOne({
-			passwordResetToken: hashedToken,
-			passwordResetExpires: { $gt: Date.now() },
-		});
-		console.log(user);
-		if (!user) {
+			const user = await UserModel.findOne({
+				passResetToken: hashedToken,
+				passResetExpires: { $gt: Date.now() },
+			});
+			if (!user) {
 			return res.status(404).json({
 				status: "Fail",
 				message: "User does not exist or Reset time expired",
@@ -271,6 +272,10 @@ const getResetPassOtpAndResetPassword = catchAsync(async (req, res) => {
 		user.passResetExpires = undefined;
 		await user.save();
 		jwtToken(user, 200, req, res);
+		return res.status(200).json({
+			status: "Success",
+			message: "Reset password successfully",
+		});
 	}
 });
 

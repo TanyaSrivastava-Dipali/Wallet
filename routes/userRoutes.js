@@ -16,6 +16,6 @@ userRouter
 	.post(AuthController.getResetPassOtpAndResetPassword);
 userRouter.route("/deposit").post(isUserLoggedIn, UserController.deposit);
 userRouter.route("/withdraw").post(isUserLoggedIn, UserController.withdraw);
-userRouter.route("/getBalance").get(isUserLoggedIn, UserController.getBalance);
-userRouter.route("/getUser").get(isUserLoggedIn, UserController.getUser);
+userRouter.route("/getBalance/:email").get(isUserLoggedIn, UserController.getBalance);
+userRouter.route("/getUser/:email").get(isUserLoggedIn,  UserController.getUser);
 export default userRouter;

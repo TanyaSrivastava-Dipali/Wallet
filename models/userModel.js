@@ -39,14 +39,10 @@ const userSchema = new mongoose.Schema({
 	pass: {
 		type: String,
 		required: [true, "Password can not be null"],
-		min: [8, "Must be at least 6, got {VALUE}"],
-		max: [255, "Must be at max 255, got {VALUE}"],
 		select: false,
 	},
 	confirmPass: {
 		type: String,
-		min: [8, "Must be at least 6, got {VALUE}"],
-		max: [255, "Must be at max 255, got {VALUE}"],
 		select: false,
 	},
 	isEmailVerified: {
@@ -77,6 +73,7 @@ userSchema.pre("save", async function (next) {
 	}
 	next();
 });
+
 userSchema.methods.validatePassword = async function (pass, userpass) {
 	return await bcrypt.compare(pass, userpass);
 };

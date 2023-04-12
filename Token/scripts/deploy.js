@@ -4,7 +4,7 @@ async function main() {
 	const [deployer] = await hre.ethers.getSigners();
 
 	const Token = await hre.ethers.getContractFactory("Token");
-	const token = await Token.connect(deployer).deploy("USD", "US Dollar");
+	const token = await Token.connect(deployer).deploy("VNC", "Vanilla Crypto");
 	console.log("Token Contract address", token.address);
 }
 
